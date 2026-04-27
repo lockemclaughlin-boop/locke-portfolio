@@ -121,7 +121,7 @@
 
     // ─── Video card (hover-to-play) ────────────────────────────────────────────
 
-    const VideoCard = ({ src, title, tag, autoPlay: auto = false, style: extraStyle = {} }) => {
+    const VideoCard = ({ src, title, tag, autoPlay: auto = false, style: extraStyle = {}, onOpen }) => {
       const ref = React.useRef(null);
 
       React.useEffect(() => {
@@ -136,10 +136,11 @@
       const doPause = () => {
         if (ref.current) { ref.current.pause(); ref.current.currentTime = 0.001; }
       };
+      const handleClick = () => { onOpen ? onOpen() : doPlay(); };
 
       return (
         <div className="video-card" style={extraStyle}
-          onMouseEnter={doPlay} onMouseLeave={doPause} onClick={doPlay}>
+          onMouseEnter={doPlay} onMouseLeave={doPause} onClick={handleClick}>
           <video ref={ref} src={src} muted playsInline preload="metadata" loop
             autoPlay={auto}
             style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
@@ -156,6 +157,54 @@
               </div>
             </div>
           )}
+        </div>
+      );
+    };
+
+    // ─── Video lightbox (click-to-open with sound) ────────────────────────────
+
+    const VideoLightbox = ({ src, title, tag, onClose }) => {
+      React.useEffect(() => {
+        const onKey = (e) => { if (e.key === "Escape") onClose(); };
+        window.addEventListener("keydown", onKey);
+        const prevOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        return () => {
+          window.removeEventListener("keydown", onKey);
+          document.body.style.overflow = prevOverflow;
+        };
+      }, [onClose]);
+
+      return (
+        <div onClick={onClose} role="dialog" aria-modal="true" aria-label={title} style={{
+          position: "fixed", inset: 0, zIndex: 200,
+          background: "rgba(8,7,6,0.92)", backdropFilter: "blur(6px)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          padding: "32px 24px", cursor: "zoom-out",
+        }}>
+          <button onClick={onClose} aria-label="Close"
+            style={{
+              position: "absolute", top: 24, right: 24,
+              background: "var(--bg-2)", border: "1px solid var(--line)",
+              color: "var(--cream)", cursor: "pointer",
+              borderRadius: 999, padding: "10px 16px",
+              fontFamily: "var(--mono)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase",
+            }}>✕ Close</button>
+          <div onClick={(e) => e.stopPropagation()} style={{
+            maxWidth: "min(1200px, 92vw)", width: "100%",
+            display: "flex", flexDirection: "column", gap: 14, cursor: "default",
+          }}>
+            <video src={src} autoPlay controls playsInline
+              style={{ width: "100%", maxHeight: "82vh", display: "block",
+                       borderRadius: 14, background: "#000",
+                       border: "1px solid var(--line)" }} />
+            {(tag || title) && (
+              <div className="flex items-center gap-3" style={{ flexWrap: "wrap" }}>
+                {tag && <span style={{ fontFamily: "var(--mono)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--accent)" }}>{tag}</span>}
+                {title && <span className="display" style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-0.02em", color: "var(--cream)" }}>{title}</span>}
+              </div>
+            )}
+          </div>
         </div>
       );
     };
@@ -483,7 +532,7 @@
 
     // ─── Work — workspaces of videos ───────────────────────────────────────────
 
-    const Workspace = ({ name, eyebrow = "Workspace", blurb, logo, accent, videos }) => (
+    const Workspace = ({ name, eyebrow = "Workspace", blurb, logo, accent, videos, onOpenVideo }) => (
       <div style={{ marginTop: 56 }}>
         <div className="flex items-center justify-between" style={{ marginBottom: 24, flexWrap: "wrap", gap: 16, paddingBottom: 20, borderBottom: "1px solid var(--line)" }}>
           <div className="flex items-center gap-4" style={{ flexWrap: "wrap" }}>
@@ -513,6 +562,7 @@
                 style={{ aspectRatio: v.aspectRatio || "9/16" }} />
             ) : (
               <VideoCard key={i} src={v.src} title={v.title} tag={v.tag}
+                onOpen={() => onOpenVideo && onOpenVideo(v)}
                 style={{ aspectRatio: v.aspectRatio || "9/16" }} />
             )
           ))}
@@ -521,6 +571,7 @@
     );
 
     const Work = () => {
+      const [active, setActive] = React.useState(null);
       const workspaces = [
         {
           name: "Selected Work",
@@ -578,11 +629,15 @@
             </div>
 
             {workspaces.map((w, i) => (
-              <Workspace key={i} {...w} />
+              <Workspace key={i} {...w} onOpenVideo={setActive} />
             ))}
 
             <style>{`@media(max-width:880px){.work-grid{grid-template-columns:1fr 1fr!important}}@media(max-width:540px){.work-grid{grid-template-columns:1fr!important}}`}</style>
           </div>
+          {active && (
+            <VideoLightbox src={active.src} title={active.title} tag={active.tag}
+              onClose={() => setActive(null)} />
+          )}
         </section>
       );
     };
