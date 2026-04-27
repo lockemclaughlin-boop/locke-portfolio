@@ -1,0 +1,6 @@
+.DS_Store
+*.tmp.mp4
+*.new.mp4
+node_modules/
+.env
+.env.local
