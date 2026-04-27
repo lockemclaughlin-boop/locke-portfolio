@@ -160,6 +160,19 @@
       );
     };
 
+    // ─── Photo card (still image) ─────────────────────────────────────────────
+
+    const PhotoCard = ({ src, title, tag, style: extraStyle = {} }) => (
+      <div className="video-card" style={extraStyle}>
+        <img src={src} alt={title} loading="lazy"
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+        <div className="vc-overlay">
+          <div style={{ fontFamily: "var(--mono)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 5 }}>{tag}</div>
+          <div className="display" style={{ fontSize: 17, fontWeight: 700, letterSpacing: "-0.02em" }}>{title}</div>
+        </div>
+      </div>
+    );
+
     // ─── Nav ───────────────────────────────────────────────────────────────────
 
     const Nav = () => (
@@ -299,7 +312,7 @@
     // ─── Client Bar ────────────────────────────────────────────────────────────
 
     const ClientBar = () => {
-      const clients = ["Unlock Patients","Jessie Lane Interiors","Not Enough Attire","Chi O","Northbound Co.","Folkpine","Halfmoon Goods","Merit & Co"];
+      const clients = ["Unlock Patients","Jessie Lane Interiors","Hudson Valley Lighting","Soiré Rum","City Global Earth","Not Enough Attire","Chi O","Northbound Co.","Folkpine","Halfmoon Goods","Merit & Co"];
       return (
         <section style={{ padding: "48px 0", borderTop: "1px solid var(--line)", borderBottom: "1px solid var(--line)" }}>
           <div className="container" style={{ marginBottom: 28 }}>
@@ -495,8 +508,13 @@
 
         <div className="work-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
           {videos.map((v, i) => (
-            <VideoCard key={i} src={v.src} title={v.title} tag={v.tag}
-              style={{ aspectRatio: v.aspectRatio || "9/16" }} />
+            v.image ? (
+              <PhotoCard key={i} src={v.image} title={v.title} tag={v.tag}
+                style={{ aspectRatio: v.aspectRatio || "9/16" }} />
+            ) : (
+              <VideoCard key={i} src={v.src} title={v.title} tag={v.tag}
+                style={{ aspectRatio: v.aspectRatio || "9/16" }} />
+            )
           ))}
         </div>
       </div>
@@ -513,7 +531,6 @@
             { src: "videos/ad-cinematography.mp4",  title: "Unlock Patients",        tag: "Commercial", aspectRatio: "16/9" },
             { src: "videos/chi-o-edit-2.mp4",       title: "Chi O",                  tag: "Social",     aspectRatio: "16/9" },
             { src: "videos/chi-o-fundraiser.mp4",   title: "Make-A-Wish Fundraiser", tag: "Event",      aspectRatio: "16/9" },
-            { src: "videos/aepi-pie.mp4",           title: "AEPi",                   tag: "Event",      aspectRatio: "16/9" },
             { src: "videos/p1030168.mp4",           title: "Plum Tree",              tag: "Creative",   aspectRatio: "16/9" },
             { src: "videos/sequence-01-1.mp4",      title: "Berry Glaze",            tag: "Brand",      aspectRatio: "16/9" },
           ],
@@ -531,6 +548,18 @@
             { src: "videos/soire-or-your-wife-will.mp4",          title: "Drink Soiré, Or Your Wife Will", tag: "Reel" },
             { src: "videos/soire-tastes-better-funny.mp4",        title: "Tastes Better — Funny Cut",       tag: "Reel" },
             { src: "videos/soire-tastes-better-serious.mp4",      title: "Tastes Better — Serious Cut",     tag: "Reel" },
+          ],
+        },
+        {
+          name: "Jessie Lane Interiors",
+          eyebrow: "Creative Direction & Photography",
+          blurb: "AD-featured interior designer Jessie Lane × Hudson Valley Lighting — three fixtures, three rooms, one weekend in the Hudson Valley.",
+          logo: <Star size={36} color="var(--c-coral)" spikes={8} />,
+          accent: "var(--c-coral)",
+          videos: [
+            { image: "images/jessie-lane-althea.jpg",    title: "Althea Chandelier",  tag: "Hudson Valley Lighting" },
+            { image: "images/jessie-lane-thornwood.jpg", title: "Thornwood Pendant",  tag: "Hudson Valley Lighting" },
+            { image: "images/jessie-lane-radcliff.jpg",  title: "Radcliff Pendant",   tag: "Hudson Valley Lighting" },
           ],
         },
       ];
